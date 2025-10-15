@@ -7,19 +7,30 @@ import profile_img from '../../assets/profile_img.png'
 import caret_icon from '../../assets/caret_icon.svg'
 //logout is from firebase.js file that i created
 import { logout } from '../../firebase'
+import { useNavigate } from 'react-router-dom'
 
 const Navbar = () => {
 
   const navRef = useRef()
 
+  const navigate = useNavigate()
+
   useEffect(() => {
-    window.addEventListener('scroll',() => {
-      if(window.scrollY >= 80){
-        navRef.current.classList.add('nav-dark')
-      }else{
-        navRef.current.classList.remove('nav-dark')
+    const handleScroll = () => {
+      if(navRef.current) { 
+        if(window.scrollY > 80){
+          navRef.current.classList.add('nav-dark')
+        } else {
+          navRef.current.classList.remove('nav-dark')
+        }
       }
-    })
+    }
+  
+    window.addEventListener('scroll', handleScroll)
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+    }
   },[])
 
   return (
@@ -27,11 +38,11 @@ const Navbar = () => {
       <div className="navbar-left">
         <img src={logo} alt="" />
         <ul>
-          <li>Home</li>
+          <li onClick={()=>navigate('/')} >Home</li>
           <li>TV Shows</li>
           <li>Movies</li>
           <li>New & Popular</li>
-          <li>My List</li>
+          <li onClick={() => navigate('/myWatchlist')}>My List</li>
           <li>Browse by Language</li>
         </ul>
       </div>

@@ -8,6 +8,9 @@ import { auth } from './firebase'
 
 import { ToastContainer, toast } from 'react-toastify';
 
+import { ListContext,ListProvider } from './context/ListContext'
+import MyWatchlist from './pages/myWatchlist/myWatchlist'
+
 const App = () => {
 
   const navigate = useNavigate()
@@ -15,7 +18,7 @@ const App = () => {
   useEffect(() => {
     onAuthStateChanged(auth, async(user)=>{
       if(user){
-        console.log("Logged In")
+        console.log("Logged In - success")
         navigate('/')
       }else{
         console.log("Logged Out")
@@ -26,12 +29,16 @@ const App = () => {
 
   return (
     <div>
-       <ToastContainer theme='dark'/>
+      
+      <ToastContainer theme='dark'/>
+      <ListProvider>
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/login' element={<Login />} />
         <Route path='/player/:id' element={<Player />} />
+        <Route path='/myWatchlist' element={<MyWatchlist />} />
       </Routes>
+      </ListProvider>
     </div>
   )
 }
