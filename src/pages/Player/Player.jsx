@@ -18,13 +18,11 @@ const Player = () => {
   const [inWlist,setInWlist] = useState(false)
 
   const [apiData,setApiData] = useState({
-    id: "",
-    name: "",
-    key: "",
-    published_at: "",
-    type: "",
-    movieId: "",
-    imageUrl: ""
+    id: '',
+    title: '',
+    videoKey: '',
+    releaseDate: '',
+    posterPath: '',
   })
 
   const options = {
@@ -35,49 +33,59 @@ const Player = () => {
     }
   };
 
-   // Fetch trailer
-  useEffect(() => {
-    fetch(`https://api.themoviedb.org/3/movie/${id}/videos?language=en-US`, options)
-    .then(res => res.json())
-    .then((res) => { 
-      const data = res.results[0]
-      setApiData((prev) => ({...prev, ...data, movieId:id}))
-    })
-    .catch(err => console.error(err));
-  },[id])
-
-  // Fetch image for wishlist
-  useEffect(() => {
-    if(!apiData.movieId) return
-
-    fetch(`https://api.themoviedb.org/3/movie/${apiData.movieId}/images`,options)
-     .then(res => res.json())
-     .then(res => {
-      setApiData((prev) => ({...prev, imageUrl: res.backdrops[0]?.file_path }))
-     })
-     .catch(err => console.error(err))
-  },[apiData.movieId])
-
   // check if already in watchlist
   useEffect(() => {
-    const exists = myWatchlist.some(movie => movie.movieId === apiData.movieId)
+    const exists = myWatchlist.some(movie => movie.id === apiData.id)
     setInWlist(exists)
   },[myWatchlist,apiData])
+
+   // Fetch trailer
+   useEffect(() => {
+    fetch(`https://api.themoviedb.org/3/movie/${id}/videos?language=en-US`, options)
+      .then(res => res.json())
+      .then((res) => { 
+        const data = res.results?.[0]  // safe access
+        setApiData((prev) => ({
+          ...prev,
+          id: id,
+          videoKey: data?.key || '', // fallback empty string
+          title: data?.name || prev.title, // fallback to real movie title
+          releaseDate: data?.published_at || prev.releaseDate
+        }))
+      })
+      .catch(err => console.error(err))
+  }, [id])
+  
+
+  // Fetch actual movie details (to get real movie title)
+useEffect(() => {
+  fetch(`https://api.themoviedb.org/3/movie/${id}?language=en-US`, options)
+    .then(res => res.json())
+    .then(res => {
+      setApiData((prev) => ({
+        ...prev,
+        title: res.original_title,      
+        releaseDate: res.release_date,  
+        posterPath: res.backdrop_path   
+      }))
+    })
+    .catch(err => console.error(err))
+}, [id])
 
   // save to localstorage
   useEffect(() => {
     localStorage.setItem('myWatchlist',JSON.stringify(myWatchlist))
-  },[myWatchlist])
+  },[inWlist])
 
   const toggleWatchlist = () => {
     if(inWlist){
-      setMyWatchlist(prev => prev.filter(movie => movie.movieId !== apiData.movieId))
+      setMyWatchlist(prev => prev.filter(movie => movie.id !== apiData.id))
       toast.info("Removed form Watchlist")
     }else{
       setMyWatchlist(prev => [...prev,apiData])
       toast.success("Added to Watchlist")
     }
-    setInWlist(prev => !prev)
+    setInWlist(!inWlist)
   }
 
   return (
@@ -87,7 +95,7 @@ const Player = () => {
           <div className="trailer-container">
             <img src={back_arrow_icon} alt="" onClick={() => navigate('/')} />
             <iframe width="90%" height="90%" 
-            src= {`https://www.youtube.com/embed/${apiData.key}`}
+            src= {`https://www.youtube.com/embed/${apiData.videoKey}`}
             title='trailer' frameBorder='0' allowFullScreen></iframe>
           </div>
       </div>
@@ -95,7 +103,7 @@ const Player = () => {
       <div className="details-container">
 
         <div className="title-actions">
-          <h1>{apiData.name}</h1>
+          <h1>{apiData.title}</h1>
           <div className="actions">
             <button id='watchlistBtn' ref={btnRef} className={` ${inWlist?'added':''} btn watchlist-btn`} onClick={toggleWatchlist}>
               {inWlist ? (
@@ -119,7 +127,7 @@ const Player = () => {
 
         <div className="metadata">
           <span className="match">96% Match</span>
-          <span>{apiData.published_at.slice(0,10)}</span>
+          <span>{apiData.releaseDate.slice(0,10)}</span>
           <span>g</span>
           <span className="rating">PG-13</span>
           <span>HD</span>

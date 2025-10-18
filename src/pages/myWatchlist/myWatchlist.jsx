@@ -17,10 +17,10 @@ const MyWatchlist = () => {
                 <h1>Watchlist</h1>
             </div>
             <div className='movie-lists'>
-                {myWatchlist.map((movie,index) => {
+                {myWatchlist.map((movie,i) => {
                     return(
-                        <div onClick={() => navigate(`/player/${movie.movieId}`)} className='myWatchlist-cards' key={index}>
-                            <img src={`https://image.tmdb.org/t/p/w500${movie.imageUrl}`} alt={movie.name} />
+                        <div onClick={() => navigate(`/player/${movie.id}`)} className='myWatchlist-cards' key={i}>
+                            <img src={`https://image.tmdb.org/t/p/w500${movie.posterPath}`} alt={movie.title} />
                             <p> {movie.title}</p>
                         </div>
                     )

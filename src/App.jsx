@@ -9,7 +9,11 @@ import { auth } from './firebase'
 import { ToastContainer, toast } from 'react-toastify';
 
 import { ListContext,ListProvider } from './context/ListContext'
-import MyWatchlist from './pages/myWatchlist/myWatchlist'
+
+
+import { lazy,Suspense } from 'react'
+
+const MyWatchlist = lazy(()=>import('./pages/myWatchlist/myWatchlist'))
 
 const App = () => {
 
@@ -32,12 +36,18 @@ const App = () => {
       
       <ToastContainer theme='dark'/>
       <ListProvider>
+      <Suspense fallback={<div>Loading...</div>}>
       <Routes>
+      
         <Route path='/' element={<Home />} />
         <Route path='/login' element={<Login />} />
         <Route path='/player/:id' element={<Player />} />
-        <Route path='/myWatchlist' element={<MyWatchlist />} />
+       
+         <Route path='/myWatchlist' element={<MyWatchlist />} />  
+         
       </Routes>
+      </Suspense>
+      
       </ListProvider>
     </div>
   )
